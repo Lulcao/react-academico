@@ -1,50 +1,39 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, Modal, Button, Alert } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { CameraView, useCameraPermissions } from 'expo-camera';
+import React from 'react';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { RootStackParamList } from '../../navigation/AppNavigator';
 
-const AlunoProfileScreen: React.FC = () => {
 
-  const [modalIsVisible, setModalIsVisible] = useState(false)
-  const [permission, requestPermission] = useCameraPermissions()
+const AlunoProfileScreen = () => {
+  
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
-  async function handleOpenCamera(){
-    try {
-      const {granted} = await requestPermission()
+  const handleEditarDados = () => {
+    navigation.navigate('ChangeData');
+  };
 
-      if(!granted){
-        return Alert.alert("Habilite permissão da câmera")
-      }
+  const handleTurmasAssociado = () => {
+    navigation.navigate('AlunoQRCode');
+  };
 
-      setModalIsVisible(true)
-    } catch (error) {
-      console.log(error)
-    }
-  }
+  const handleLogout = () => {
+    console.log('Logout');
+  };
 
   return (
     <View style={styles.container}>
-      {/* Logo da faculdade */}
-      <Image
-        source={require('../../utils/logocefet.png')} // Caminho da imagem da logo
-        style={styles.logo}
-      />
-      <Text style={styles.title}>Portal Controle de Presença</Text>
+      <Text style={styles.title}>Home Aluno</Text>
+      
+      <TouchableOpacity style={styles.button} onPress={handleEditarDados}>
+        <Text style={styles.buttonText}>Visualizar Dados</Text>
+      </TouchableOpacity>
 
+      <TouchableOpacity style={styles.button} onPress={handleTurmasAssociado}>
+        <Text style={styles.buttonText}>Turmas Associado</Text>
+      </TouchableOpacity>
 
-
-      {/* Botão de escanear QR code */}
-      <TouchableOpacity style={styles.button} onPress={() => console.log('Escanear QR Code')}>
-        <Ionicons name="qr-code-outline" size={24} color="white" />
-        <Button title='Escanear QR Presença' onPress={handleOpenCamera}/>
-
-        <Modal visible={modalIsVisible} style={{ flex: 1 }} >
-          <CameraView style={{ flex: 1 }} facing='back' />
-            <View style={styles.footer}>
-              <Button title='Cancelar' onPress={() => setModalIsVisible(false)} />
-            </View>
-        </Modal>
-
+      <TouchableOpacity style={styles.button} onPress={handleLogout}>
+        <Text style={styles.buttonText}>Logout</Text>
       </TouchableOpacity>
     </View>
   );
@@ -53,50 +42,30 @@ const AlunoProfileScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    padding: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-    padding: 20,
-  },
-  footer: {
-      position: 'absolute',
-      bottom: 32, 
-      left: 32,
-      right:32
-  },
-  logo: {
-    width: 200, // Ajuste de acordo com o tamanho da sua logo
-    height: 100,
-    resizeMode: 'contain',
-    marginBottom: 40, // Espaço entre a logo e o título
+    backgroundColor: '#f4f7fc',
   },
   title: {
-    fontSize: 30,
+    fontSize: 28,
     fontWeight: 'bold',
+    color: '#2c3e50',
     marginBottom: 20,
-    color: '#2c3e50', // Cor mais séria e profissional
-    textAlign: 'center',
-    fontFamily: 'Roboto', // Fonte mais acadêmica
   },
   button: {
-    flexDirection: 'row',
+    backgroundColor: '#2c3e50',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    width: '100%',
     alignItems: 'center',
-    backgroundColor: '#007bff', // Azul corporativo
-    paddingVertical: 14,
-    paddingHorizontal: 30,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 6,
+    marginVertical: 10, // Espaço acima e abaixo de cada botão
   },
   buttonText: {
-    color: 'white',
+    color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
-    marginLeft: 12,
-    fontFamily: 'Arial', // Fonte mais moderna e acadêmica
   },
 });
 

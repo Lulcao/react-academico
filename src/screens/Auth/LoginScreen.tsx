@@ -16,15 +16,15 @@ const LoginScreen: React.FC = () => {
     
     if (user) {
       setError('');
-      login(user.role);
+      login(user.role, user.email, user.nome, user.sobrenome, user.periodo);
     } else {
-      setError('Credenciais inválidas. Verifique seu email e senha.');
+      setError('Credenciais inválidas. Verifique seu usuario e senha.');
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Controle de Presença CEFET/RJ</Text>
+      <Text style={styles.title}>Projeto Academico - CEFET/RJ</Text>
       <TextInput
         style={styles.input}
         placeholder="Usuário"
