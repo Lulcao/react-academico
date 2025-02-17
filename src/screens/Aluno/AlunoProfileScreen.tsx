@@ -1,22 +1,50 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Image, Modal, Button, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 
 const AlunoProfileScreen: React.FC = () => {
+
+  const [modalIsVisible, setModalIsVisible] = useState(false)
+  const [permission, requestPermission] = useCameraPermissions()
+
+  async function handleOpenCamera(){
+    try {
+      const {granted} = await requestPermission()
+
+      if(!granted){
+        return Alert.alert("Habilite permissão da câmera")
+      }
+
+      setModalIsVisible(true)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   return (
     <View style={styles.container}>
       {/* Logo da faculdade */}
-      <Image 
+      <Image
         source={require('../../utils/logocefet.png')} // Caminho da imagem da logo
         style={styles.logo}
       />
-
       <Text style={styles.title}>Portal Controle de Presença</Text>
-      
+
+
+
       {/* Botão de escanear QR code */}
       <TouchableOpacity style={styles.button} onPress={() => console.log('Escanear QR Code')}>
         <Ionicons name="qr-code-outline" size={24} color="white" />
-        <Text style={styles.buttonText}>Escanear QR Presença</Text>
+        <Button title='Escanear QR Presença' onPress={handleOpenCamera}/>
+
+        <Modal visible={modalIsVisible} style={{ flex: 1 }} >
+          <CameraView style={{ flex: 1 }} facing='back' />
+            <View style={styles.footer}>
+              <Button title='Cancelar' onPress={() => setModalIsVisible(false)} />
+            </View>
+        </Modal>
+
       </TouchableOpacity>
     </View>
   );
@@ -29,6 +57,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#f5f5f5',
     padding: 20,
+  },
+  footer: {
+      position: 'absolute',
+      bottom: 32, 
+      left: 32,
+      right:32
   },
   logo: {
     width: 200, // Ajuste de acordo com o tamanho da sua logo

@@ -4,55 +4,48 @@ import QRCode from 'react-native-qrcode-svg'; // Biblioteca para gerar o QR Code
 import { Ionicons } from '@expo/vector-icons';
 
 const ProfessorProfileScreen: React.FC = () => {
-  const [qrCodeVisible, setQrCodeVisible] = useState(false); // Estado para controlar a visibilidade do QR Code
-  const [qrCodeData, setQrCodeData] = useState(''); // Dados do QR Code
-  const [currentDate, setCurrentDate] = useState(''); // Estado para armazenar a data
+  const [qrCodeVisible, setQrCodeVisible] = useState(false);
+  const [qrCodeData, setQrCodeData] = useState('');
+  const [currentDate, setCurrentDate] = useState('');
 
-  // Função para gerar QR Code
   const handleGenerateQRCode = () => {
-    const qrCodeContent = 'PresencaProfessor123'; // Um valor único para o professor (pode ser dinâmico)
-    setQrCodeData(qrCodeContent); // Atribuindo o valor ao estado
-    setQrCodeVisible(true); // Tornando o QR Code visível
+    const qrCodeContent = 'PresencaProfessor123';
+    setQrCodeData(qrCodeContent);
+    setQrCodeVisible(true);
 
-    // Pegando a data atual no formato desejado
     const date = new Date();
     const formattedDate = `Presença dia ${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
-    setCurrentDate(formattedDate); // Armazenando a data formatada
+    setCurrentDate(formattedDate);
 
     Alert.alert('QR Code Gerado', 'QR Code para registro de presença gerado com sucesso!');
   };
 
-  // Função para fechar e esconder o QR Code
   const handleCloseQRCode = () => {
-    setQrCodeVisible(false); // Ocultando o QR Code
+    setQrCodeVisible(false);
   };
 
   return (
     <View style={styles.container}>
-      {/* Logo da faculdade */}
       <Image 
         source={require('../../utils/logocefet.png')} 
         style={styles.logo}
       />
-
       <Text style={styles.title}>Portal Controle de Presença</Text>
-
-      {/* Botão de gerar QR Code */}
       <TouchableOpacity style={styles.button} onPress={handleGenerateQRCode}>
-        <Ionicons name="qr-code-outline" size={24} color="white" />
-        <Text style={styles.buttonText}>Gerar QR Presença</Text>
+        <View style={styles.buttonContent}>
+          <Ionicons name="qr-code-outline" size={24} color="white" />
+          <Text style={styles.buttonText}>Gerar QR Presença</Text>
+        </View>
       </TouchableOpacity>
-
-      {/* Exibe o QR Code quando qrCodeVisible for true */}
       {qrCodeVisible && (
         <View style={styles.qrCodeContainer}>
-          <QRCode value={qrCodeData} size={200} /> {/* Gerando o QR Code com o valor atribuído */}
-          <Text style={styles.dateText}>{currentDate}</Text> {/* Exibindo a data abaixo do QR Code */}
-
-          {/* Botão para fechar o QR Code */}
+          <QRCode value={qrCodeData} size={200} />
+          <Text style={styles.dateText}>{currentDate}</Text>
           <TouchableOpacity style={styles.closeButton} onPress={handleCloseQRCode}>
-            <Ionicons name="close-circle-outline" size={30} color="white" />
-            <Text style={styles.closeButtonText}>Fechar</Text>
+            <View style={styles.buttonContent}>
+              <Ionicons name="close-circle-outline" size={30} color="white" />
+              <Text style={styles.closeButtonText}>Fechar</Text>
+            </View>
           </TouchableOpacity>
         </View>
       )}
@@ -67,6 +60,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#f5f5f5',
     padding: 20,
+    bottom: 80,
   },
   logo: {
     width: 200,
@@ -95,6 +89,11 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 6,
   },
+  buttonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   buttonText: {
     color: 'white',
     fontSize: 18,
@@ -116,7 +115,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ff4d4d', // Cor vermelha para o botão de fechar
+    backgroundColor: '#ff4d4d',
     paddingVertical: 10,
     paddingHorizontal: 30,
     borderRadius: 8,

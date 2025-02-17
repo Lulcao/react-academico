@@ -1,6 +1,5 @@
-// src/screens/Auth/LoginScreen.tsx
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { mockUsers, User } from '../../services/mockData';
 import { useAuth } from '../../context/AuthContext';
 
@@ -15,10 +14,8 @@ const LoginScreen: React.FC = () => {
       (u) => u.email === email.trim() && u.password === password
     );
     
-    console.log('Usuário encontrado:', user);
-    
     if (user) {
-      setError('erro inesperado');
+      setError('');
       login(user.role);
     } else {
       setError('Credenciais inválidas. Verifique seu email e senha.');
@@ -27,10 +24,11 @@ const LoginScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
+      <Text style={styles.title}>Controle de Presença CEFET/RJ</Text>
       <TextInput
         style={styles.input}
-        placeholder="Email"
+        placeholder="Usuário"
+        placeholderTextColor="#888"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
@@ -39,12 +37,15 @@ const LoginScreen: React.FC = () => {
       <TextInput
         style={styles.input}
         placeholder="Senha"
+        placeholderTextColor="#888"
         value={password}
         onChangeText={setPassword}
         secureTextEntry={true}
       />
       {error ? <Text style={styles.error}>{error}</Text> : null}
-      <Button title="Entrar" onPress={handleLogin} />
+      <TouchableOpacity style={styles.button} onPress={handleLogin}>
+        <Text style={styles.buttonText}>Entrar</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -52,27 +53,45 @@ const LoginScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    padding: 20,
     justifyContent: 'center',
-    backgroundColor: '#fff',
+    alignItems: 'center',
+    backgroundColor: '#f4f7fc',
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
+    color: '#2c3e50',
     marginBottom: 20,
-    textAlign: 'center',
   },
   input: {
+    width: '100%',
     borderWidth: 1,
     borderColor: '#ccc',
-    padding: 10,
+    backgroundColor: '#fff',
+    padding: 12,
     marginBottom: 10,
-    borderRadius: 4,
+    borderRadius: 8,
+    fontSize: 16,
   },
   error: {
     color: 'red',
     marginBottom: 10,
     textAlign: 'center',
+  },
+  button: {
+    backgroundColor: '#2c3e50',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    width: '100%',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
 
