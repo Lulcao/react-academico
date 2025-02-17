@@ -8,13 +8,25 @@ export interface User {
   export const mockUsers: User[] = [
     {
       id: 1,
-      email: 'c.fuschilo@cefet-rj.br',
+      email: 'cristiano.fuschilo',
       password: 'professor123',
       role: 'professor',
     },
     {
       id: 2,
-      email: 'l.bhering@cefet-rj.br',
+      email: 'lucas.bhering',
+      password: 'aluno123',
+      role: 'aluno',
+    },
+    {
+      id: 3,
+      email: 'gabriel.gusmao',
+      password: 'aluno123',
+      role: 'aluno',
+    },
+    {
+      id: 4,
+      email: 'pedro.carvalho',
       password: 'aluno123',
       role: 'aluno',
     },
