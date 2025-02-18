@@ -34,7 +34,6 @@ const AppNavigator: React.FC = () => {
       <Stack.Screen 
         name="LoginScreen" 
         component={LoginScreen} 
-        options={{ headerShown: false }}
       />
       <Stack.Screen 
         name="AlunoProfileScreen" 

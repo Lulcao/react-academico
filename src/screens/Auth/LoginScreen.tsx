@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { mockUsers, User } from '../../services/mockData';
-import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { useNavigation, NavigationProp, CommonActions } from '@react-navigation/native';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import { useAuth } from '../../context/AuthContext';
 
@@ -16,20 +16,15 @@ const LoginScreen: React.FC = () => {
     const user: User | undefined = mockUsers.find(
       (u) => u.email === email.trim() && u.password === password
     );
-    
+  
     if (user) {
-      setError('');
       login(user.role, user.email, user.nome, user.sobrenome, user.periodo);
       Alert.alert("Sucesso", "Você foi logado com sucesso!");
-      setTimeout(() => {
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'AlunoProfileScreen' }],
-      });
-    },2)} else {
+    } else {
       Alert.alert("Erro", "Email ou senha inválidos.");
     }
   };
+  
 
   return (
     <View style={styles.container}>

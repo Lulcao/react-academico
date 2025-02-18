@@ -8,7 +8,6 @@ import { useAuth } from "../../context/AuthContext";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../navigation/AppNavigator";
 import { useNavigation } from "@react-navigation/native";
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AlunoProfileScreen: React.FC = () => {
   const { userEmail } = useAuth();
@@ -21,7 +20,6 @@ const AlunoProfileScreen: React.FC = () => {
   const SCAN_COOLDOWN = 3000;
   
   const handleLogout = async () => {
-    await AsyncStorage.clear();
     logout();
 
     navigation.reset({
@@ -113,7 +111,8 @@ const AlunoProfileScreen: React.FC = () => {
           <Ionicons name="chatbubbles-outline" size={28} color="white" />
           <Text style={styles.buttonText}>Chat</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={handleLogout}>
+        <TouchableOpacity style={[styles.button, styles.logoutButton]} onPress={handleLogout}>
+        <Ionicons name= "exit-outline" size={28} color="white" />
         <Text style={styles.buttonText}>Logout</Text>
       </TouchableOpacity>
       </View>
@@ -168,14 +167,17 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
     paddingBottom: 40,
   },
   userInfo: {
     alignItems: "center",
     marginTop: 30,
+    marginBottom: 20
   },
   avatarContainer: {
+    position: 'absolute',
+    zIndex: 10,
     width: 120,
     height: 120,
     borderRadius: 60,
@@ -183,7 +185,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 15,
-    elevation: 3,
+    elevation: 10,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -196,13 +198,16 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
     color: "#2c3e50",
+    paddingTop: 150,
     marginBottom: 5,
   },
   userType: {
     fontSize: 16,
+    paddingTop: 10,
     color: "#7f8c8d",
   },
   button: {
+    marginTop: 80,
     flexDirection: "row",
     alignItems: "center",
     padding: 16,
@@ -220,7 +225,7 @@ const styles = StyleSheet.create({
   },
   scanButton: {
     backgroundColor: "#3498db",
-    bottom: 300
+    bottom: 30
   },
   closeButton: {
     backgroundColor: "#e74c3c",
@@ -266,12 +271,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     width: "100%",
-    marginTop: 20,
+    marginTop: 10,
   },
   chatButton: {
     backgroundColor: "#27ae60",
-    marginTop: 10,
+    marginTop: -2,
   },
+  logoutButton: {
+    backgroundColor: '#E06666',
+    alignItems: 'center',
+    marginTop: 95,
+
+  }
 });
 
 export default AlunoProfileScreen;
