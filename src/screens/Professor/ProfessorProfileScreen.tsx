@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, Alert, Modal, Button } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, Alert, Modal, SafeAreaView, Platform } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import { Ionicons } from "@expo/vector-icons";
-import { ref, onValue, remove } from "firebase/database";
+import { ref, onValue, remove, get } from "firebase/database";
 import { db } from "../../utils/firebaseConfig";
 
 const ProfessorProfileScreen: React.FC = () => {
@@ -10,13 +10,21 @@ const ProfessorProfileScreen: React.FC = () => {
   const [qrCodeData, setQrCodeData] = useState("");
   const [currentDate, setCurrentDate] = useState("");
   const [presencas, setPresencas] = useState<any[]>([]);
-  const [isModalVisible, setIsModalVisible] = useState(false);  // Estado para controle da modal
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   useEffect(() => {
     const presencaRef = ref(db, "presencas/");
     onValue(presencaRef, (snapshot) => {
       const data = snapshot.val();
-      if (data) setPresencas(Object.values(data));
+      if (data) {
+        const presencasList = Object.entries(data).map(([key, value]) => ({
+          id: key,
+          ...(value as object)
+        }));
+        setPresencas(presencasList);
+      } else {
+        setPresencas([]);
+      }
     });
   }, []);
 
@@ -32,17 +40,30 @@ const ProfessorProfileScreen: React.FC = () => {
     Alert.alert("QR Code Gerado", "QR Code para registro de presença gerado com sucesso!");
   };
 
-  // Função para abrir a modal
-  const openModal = () => {
-    setIsModalVisible(true);
+  const handleCloseQRCode = () => {
+    setQrCodeVisible(false);
+    setQrCodeData("");
   };
 
-  // Função para fechar a modal
-  const closeModal = () => {
-    setIsModalVisible(false);
-  };
+  const openModal = () => setIsModalVisible(true);
+  const closeModal = () => setIsModalVisible(false);
 
-  // Função para limpar a lista de presença
+  
+
+  const renderPresencaItem = ({ item }: { item: any }) => (
+    <View style={styles.presencaItem}>
+      <View style={styles.presencaContent}>
+        <Ionicons name="person-outline" size={24} color="#2c3e50" style={styles.userIcon} />
+        <View style={styles.presencaInfo}>
+          <Text style={styles.userName}>{item.nome}</Text>
+          <Text style={styles.presencaTime}>
+            {new Date(item.horario).toLocaleString()}
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+
   const clearPresencas = () => {
     const presencaRef = ref(db, "presencas/");
     remove(presencaRef)
@@ -56,76 +77,252 @@ const ProfessorProfileScreen: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Portal Controle de Presença</Text>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Portal de Presença</Text>
+        <Text style={styles.subtitle}>Área do Professor</Text>
+      </View>
 
-      <TouchableOpacity style={styles.button} onPress={handleGenerateQRCode}>
-        <Ionicons name="qr-code-outline" size={24} color="white" />
-        <Text style={styles.buttonText}>Gerar QR Presença</Text>
-      </TouchableOpacity>
+      <View style={styles.content}>
+        <TouchableOpacity 
+          style={[styles.button, styles.primaryButton]} 
+          onPress={handleGenerateQRCode}
+        >
+          <Ionicons name="qr-code-outline" size={24} color="white" />
+          <Text style={styles.buttonText}>Gerar QR Presença</Text>
+        </TouchableOpacity>
 
-      {qrCodeVisible && (
-        <View style={styles.qrCodeContainer}>
-          <QRCode value={qrCodeData} size={200} />
-          <Text style={styles.dateText}>{currentDate}</Text>
-        </View>
-      )}
+        {qrCodeVisible && (
+          <View style={styles.qrCodeContainer}>
+            <View style={styles.qrCodeWrapper}>
+              <QRCode value={qrCodeData} size={200} />
+              <TouchableOpacity 
+                style={styles.closeQRButton}
+                onPress={handleCloseQRCode}
+              >
+                <Ionicons name="close-circle" size={32} color="#e74c3c" />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.dateText}>{currentDate}</Text>
+          </View>
+        )}
 
-      {/* Botão para abrir a modal com a lista de presenças */}
-      <TouchableOpacity style={styles.button} onPress={openModal}>
-        <Ionicons name="list-outline" size={24} color="white" />
-        <Text style={styles.buttonText}>Exibir Lista de Presenças</Text>
-      </TouchableOpacity>
+        <TouchableOpacity 
+          style={[styles.button, styles.secondaryButton]} 
+          onPress={openModal}
+        >
+          <Ionicons name="list-outline" size={24} color="white" />
+          <Text style={styles.buttonText}>Lista de Presenças</Text>
+        </TouchableOpacity>
+      </View>
 
-      {/* Modal para exibir a lista de presenças */}
       <Modal visible={isModalVisible} animationType="slide" transparent={true}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.listTitle}>Lista de Presenças</Text>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Lista de Presenças</Text>
+              <Text style={styles.modalSubtitle}>{currentDate}</Text>
+            </View>
+
             <FlatList
               data={presencas}
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item }) => (
-                <View style={styles.presencaItem}>
-                  <Text>{item.nome} - {new Date(item.horario).toLocaleString()}</Text>
-                </View>
-              )}
+              keyExtractor={(item) => item.id}
+              renderItem={renderPresencaItem}
+              style={styles.list}
+              contentContainerStyle={styles.listContent}
+              showsVerticalScrollIndicator={false}
             />
-            <TouchableOpacity style={styles.button} onPress={clearPresencas}>
-              <Ionicons name="trash-outline" size={24} color="white" />
-              <Text style={styles.buttonText}>Limpar Lista</Text>
-            </TouchableOpacity>
-            <Button title="Fechar" onPress={closeModal} />
+
+            <View style={styles.modalFooter}>
+              <TouchableOpacity 
+                style={[styles.button, styles.dangerButton]} 
+                onPress={clearPresencas}
+              >
+                <Ionicons name="trash-outline" size={24} color="white" />
+                <Text style={styles.buttonText}>Limpar Lista</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={[styles.button, styles.closeButton]} 
+                onPress={closeModal}
+              >
+                <Ionicons name="close-outline" size={24} color="white" />
+                <Text style={styles.buttonText}>Fechar</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#f5f5f5" },
-  title: { fontSize: 30, fontWeight: "bold", marginBottom: 20, color: "#2c3e50" },
-  button: { flexDirection: "row", alignItems: "center", backgroundColor: "#007bff", padding: 14, borderRadius: 12, marginBottom: 10 },
-  buttonText: { color: "white", fontSize: 18, fontWeight: "bold", marginLeft: 12 },
-  qrCodeContainer: { marginTop: 30, alignItems: "center" },
-  dateText: { marginTop: 10, fontSize: 18, fontWeight: "bold", color: "#2c3e50" },
-  listTitle: { fontSize: 24, fontWeight: "bold", marginTop: 20, textAlign: "center" },
-  presencaItem: { padding: 10, borderBottomWidth: 1, borderBottomColor: "#ddd" },
-
-  // Estilos para a modal
-  modalContainer: {
+  container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)", // Fundo semitransparente
+    backgroundColor: "#f5f5f5",
   },
-  modalContent: {
-    width: "80%",
+  header: {
+    backgroundColor: "#2c3e50",
+    padding: 20,
+    paddingTop: Platform.OS === 'android' ? 40 : 20,
+    alignItems: "center",
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "white",
+    marginBottom: 5,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: "#bdc3c7",
+  },
+  content: {
+    flex: 1,
+    padding: 20,
+    alignItems: "center",
+  },
+  button: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 15,
+    borderRadius: 12,
+    width: '90%',
+    justifyContent: 'center',
+    marginVertical: 8,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  primaryButton: {
+    backgroundColor: "#3498db",
+  },
+  secondaryButton: {
+    backgroundColor: "#2980b9",
+  },
+  dangerButton: {
+    backgroundColor: "#e74c3c",
+    marginBottom: 10,
+  },
+  closeButton: {
+    backgroundColor: "#7f8c8d",
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "600",
+    marginLeft: 12,
+  },
+  qrCodeContainer: {
+    marginVertical: 20,
+    alignItems: "center",
+  },
+  qrCodeWrapper: {
     backgroundColor: "white",
     padding: 20,
-    borderRadius: 10,
+    borderRadius: 15,
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    position: 'relative',
+  },
+  closeQRButton: {
+    position: 'absolute',
+    top: -15,
+    right: -15,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 2,
+  },
+  dateText: {
+    marginTop: 15,
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#2c3e50",
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
     alignItems: "center",
+  },
+  modalContent: {
+    width: "90%",
+    maxHeight: "80%",
+    backgroundColor: "white",
+    borderRadius: 20,
+    overflow: "hidden",
+  },
+  modalHeader: {
+    backgroundColor: "#2c3e50",
+    padding: 20,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "white",
+    marginBottom: 5,
+  },
+  modalSubtitle: {
+    fontSize: 16,
+    color: "#bdc3c7",
+  },
+  list: {
+    flex: 1,
+  },
+  listContent: {
+    padding: 15,
+  },
+  presencaItem: {
+    backgroundColor: "white",
+    borderRadius: 10,
+    marginBottom: 10,
+    padding: 15,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.22,
+    shadowRadius: 2.22,
+  },
+  presencaContent: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  userIcon: {
+    marginRight: 15,
+  },
+  presencaInfo: {
+    flex: 1,
+  },
+  userName: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#2c3e50",
+    marginBottom: 4,
+  },
+  presencaTime: {
+    fontSize: 14,
+    color: "#7f8c8d",
+  },
+  modalFooter: {
+    padding: 15,
+    borderTopWidth: 1,
+    borderTopColor: "#ecf0f1",
   },
 });
 

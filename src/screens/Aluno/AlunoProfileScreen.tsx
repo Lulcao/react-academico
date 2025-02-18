@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Alert, Modal, Button } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Alert, Modal, SafeAreaView, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { ref, push } from "firebase/database";
@@ -12,11 +12,11 @@ const AlunoProfileScreen: React.FC = () => {
   const [permission, requestPermission] = useCameraPermissions();
   const [isScanning, setIsScanning] = useState(false);
   const lastScanRef = useRef<number>(0);
-  const SCAN_COOLDOWN = 3000; // 3 seconds cooldown between scans
+  const SCAN_COOLDOWN = 3000;
 
   async function handleOpenCamera() {
     const { granted } = await requestPermission();
-    if (!granted) return Alert.alert("Habilite permissão da câmera");
+    if (!granted) return Alert.alert("Permissão Necessária", "Habilite a permissão da câmera para continuar");
     setModalIsVisible(true);
     setIsScanning(false);
     lastScanRef.current = 0;
@@ -25,7 +25,6 @@ const AlunoProfileScreen: React.FC = () => {
   const handleScanQRCode = useCallback((qrCodeValue: string) => {
     const now = Date.now();
     
-    // Check if we're already scanning or if we're within the cooldown period
     if (isScanning || (now - lastScanRef.current) < SCAN_COOLDOWN) {
       return;
     }
@@ -41,16 +40,20 @@ const AlunoProfileScreen: React.FC = () => {
 
     push(ref(db, "presencas/"), alunoPresente)
       .then(() => {
-        Alert.alert("Presença Registrada!", "Sua presença foi confirmada.");
-        // Close modal after successful scan
-        setModalIsVisible(false);
+        Alert.alert(
+          "Presença Confirmada!", 
+          "Sua presença foi registrada com sucesso.",
+          [{ text: "OK", onPress: () => setModalIsVisible(false) }]
+        );
       })
       .catch((error) => {
         console.error(error);
-        Alert.alert("Erro", "Não foi possível registrar a presença. Tente novamente.");
+        Alert.alert(
+          "Erro no Registro", 
+          "Não foi possível registrar sua presença. Tente novamente."
+        );
       })
       .finally(() => {
-        // Reset scanning state after a short delay
         setTimeout(() => {
           setIsScanning(false);
         }, SCAN_COOLDOWN);
@@ -64,38 +67,175 @@ const AlunoProfileScreen: React.FC = () => {
   }, []);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Portal Controle de Presença</Text>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Portal de Presença</Text>
+        <Text style={styles.subtitle}>Área do Aluno</Text>
+      </View>
 
-      <TouchableOpacity 
-        style={styles.button} 
-        onPress={handleOpenCamera}
-        disabled={isScanning}
-      >
-        <Ionicons name="qr-code-outline" size={24} color="white" />
-        <Text style={styles.buttonText}>Escanear QR Presença</Text>
-      </TouchableOpacity>
-
-      <Modal visible={modalIsVisible} style={{ flex: 1 }}>
-        <CameraView
-          style={{ flex: 1 }}
-          facing="back"
-          onBarcodeScanned={isScanning ? undefined : (e) => handleScanQRCode(e.data)}
-        />
-        <View style={styles.footer}>
-          <Button title="Cancelar" onPress={handleCloseCamera} />
+      <View style={styles.content}>
+        <View style={styles.userInfo}>
+          <View style={styles.avatarContainer}>
+            <Ionicons name="person-circle-outline" size={80} color="#2c3e50" />
+          </View>
+          <Text style={styles.userEmail}>{userEmail}</Text>
+          <Text style={styles.userType}>Aluno</Text>
         </View>
+
+        <TouchableOpacity 
+          style={[styles.button, styles.scanButton, isScanning && styles.buttonDisabled]} 
+          onPress={handleOpenCamera}
+          disabled={isScanning}
+        >
+          <Ionicons name="qr-code-outline" size={28} color="white" />
+          <Text style={styles.buttonText}>Escanear QR Presença</Text>
+        </TouchableOpacity>
+      </View>
+
+      <Modal visible={modalIsVisible} animationType="slide">
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={styles.cameraHeader}>
+            <Text style={styles.cameraTitle}>Escaneie o QR Code</Text>
+            <Text style={styles.cameraSubtitle}>Posicione o código no centro da tela</Text>
+          </View>
+
+          <CameraView
+            style={styles.camera}
+            facing="back"
+            onBarcodeScanned={isScanning ? undefined : (e) => handleScanQRCode(e.data)}
+          />
+
+          <TouchableOpacity 
+            style={[styles.button, styles.closeButton]} 
+            onPress={handleCloseCamera}
+          >
+            <Ionicons name="close-circle-outline" size={24} color="white" />
+            <Text style={styles.buttonText}>Fechar Câmera</Text>
+          </TouchableOpacity>
+        </SafeAreaView>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#f5f5f5" },
-  title: { fontSize: 30, fontWeight: "bold", marginBottom: 20, color: "#2c3e50" },
-  button: { flexDirection: "row", alignItems: "center", backgroundColor: "#007bff", padding: 14, borderRadius: 12 },
-  buttonText: { color: "white", fontSize: 18, fontWeight: "bold", marginLeft: 12 },
-  footer: { position: "absolute", bottom: 32, left: 32, right: 32 },
+  container: {
+    flex: 1,
+    backgroundColor: "#f5f5f5",
+  },
+  header: {
+    backgroundColor: "#2c3e50",
+    padding: 20,
+    paddingTop: Platform.OS === 'android' ? 40 : 20,
+    alignItems: "center",
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "white",
+    marginBottom: 5,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: "#bdc3c7",
+  },
+  content: {
+    flex: 1,
+    padding: 20,
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingBottom: 40,
+  },
+  userInfo: {
+    alignItems: "center",
+    marginTop: 30,
+  },
+  avatarContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: "#ecf0f1",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 15,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  userEmail: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#2c3e50",
+    marginBottom: 5,
+  },
+  userType: {
+    fontSize: 16,
+    color: "#7f8c8d",
+  },
+  button: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 16,
+    borderRadius: 12,
+    width: '90%',
+    justifyContent: 'center',
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  scanButton: {
+    backgroundColor: "#3498db",
+    bottom: 300
+  },
+  closeButton: {
+    backgroundColor: "#e74c3c",
+    position: 'absolute',
+    bottom: 40,
+    left: '5%',
+    right: '5%',
+  },
+  buttonDisabled: {
+    backgroundColor: "#bdc3c7",
+    opacity: 0.7,
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "600",
+    marginLeft: 12,
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
+  cameraHeader: {
+    padding: 20,
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.8)",
+  },
+  cameraTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "white",
+    marginBottom: 5,
+  },
+  cameraSubtitle: {
+    fontSize: 14,
+    color: "#bdc3c7",
+  },
+  camera: {
+    flex: 1,
+  },
 });
 
 export default AlunoProfileScreen;
