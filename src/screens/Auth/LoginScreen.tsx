@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { mockUsers, User } from '../../services/mockData';
 import { useAuth } from '../../context/AuthContext';
 
@@ -15,10 +15,10 @@ const LoginScreen: React.FC = () => {
     );
     
     if (user) {
-      setError('');
-      login(user.role);
+      login(user.role, user.email);  // Passar o email correto para o login
+      Alert.alert("Sucesso", "Você foi logado com sucesso!");
     } else {
-      setError('Credenciais inválidas. Verifique seu email e senha.');
+      Alert.alert("Erro", "Email ou senha inválidos.");
     }
   };
 

@@ -1,20 +1,22 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Alert, Modal, Button } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { ref, push } from "firebase/database";
 import { db } from "../../utils/firebaseConfig";
+import { useAuth } from "../../context/AuthContext";  // Importar o contexto
 
 const AlunoProfileScreen: React.FC = () => {
+  const { userEmail } = useAuth();  // Acessar o email do usuário
   const [modalIsVisible, setModalIsVisible] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
-  const [isScanning, setIsScanning] = useState(false); // Evitar múltiplos envios
+  const [isScanning, setIsScanning] = useState(false); // Flag to prevent multiple scans
 
   async function handleOpenCamera() {
     const { granted } = await requestPermission();
     if (!granted) return Alert.alert("Habilite permissão da câmera");
     setModalIsVisible(true);
-    setIsScanning(false); // Resetar o estado ao abrir a câmera
+    setIsScanning(false);
   }
 
   function handleScanQRCode(qrCodeValue: string) {
@@ -22,7 +24,7 @@ const AlunoProfileScreen: React.FC = () => {
     setIsScanning(true);
 
     const alunoPresente = {
-      nome: "Aluno Exemplo",
+      nome: userEmail,
       horario: new Date().toISOString(),
       qrCode: qrCodeValue,
     };
@@ -32,6 +34,8 @@ const AlunoProfileScreen: React.FC = () => {
       .catch((error) => console.error(error))
       .finally(() => setModalIsVisible(false)); // Fechar modal após escaneamento
   }
+
+ 
 
   return (
     <View style={styles.container}>
@@ -65,4 +69,3 @@ const styles = StyleSheet.create({
 });
 
 export default AlunoProfileScreen;
-  

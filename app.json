@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Academimais",
-    "slug": "Academimais",
+    "name": "ControlePres",
+    "slug": "ControlePres",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
