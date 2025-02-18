@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: "#2c3e50",
     padding: 20,
-    paddingTop: Platform.OS === 'android' ? 40 : 20,
+    paddingTop: Platform.OS === "android" ? 40 : 20,
     alignItems: "center",
   },
   title: {
@@ -216,17 +216,15 @@ const styles = StyleSheet.create({
   button: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 15,
+    justifyContent: "center",
+    width: "90%",
+    height: 60,
     borderRadius: 12,
-    width: '90%',
-    justifyContent: 'center',
     marginVertical: 8,
+    paddingHorizontal: 16,
     elevation: 3,
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
   },
@@ -235,6 +233,13 @@ const styles = StyleSheet.create({
   },
   secondaryButton: {
     backgroundColor: "#2980b9",
+  },
+  chatButton: {
+    backgroundColor: "#27ae60",
+  },
+  logoutButton: {
+    backgroundColor: "#E06666",
+    marginTop:340
   },
   dangerButton: {
     backgroundColor: "#e74c3c",
@@ -259,19 +264,16 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     elevation: 5,
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    position: 'relative',
+    position: "relative",
   },
   closeQRButton: {
-    position: 'absolute',
+    position: "absolute",
     top: -15,
     right: -15,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 20,
     padding: 2,
   },
@@ -322,10 +324,7 @@ const styles = StyleSheet.create({
     padding: 15,
     elevation: 2,
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.22,
     shadowRadius: 2.22,
   },
@@ -354,15 +353,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: "#ecf0f1",
   },
-  chatButton: {
-    backgroundColor: "#27ae60",
-    marginTop: 10,
-  },
-  logoutButton: {
-    backgroundColor: '#E06666',
-    alignItems: 'center',
-    marginTop: 350,
-  }
 });
+
 
 export default ProfessorProfileScreen;

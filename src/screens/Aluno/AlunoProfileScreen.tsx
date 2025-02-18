@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: "#2c3e50",
     padding: 20,
-    paddingTop: Platform.OS === 'android' ? 40 : 20,
+    paddingTop: Platform.OS === "android" ? 40 : 20,
     alignItems: "center",
   },
   title: {
@@ -175,10 +175,10 @@ const styles = StyleSheet.create({
   userInfo: {
     alignItems: "center",
     marginTop: 30,
-    marginBottom: 20
+    marginBottom: 20,
   },
   avatarContainer: {
-    position: 'absolute',
+    position: "absolute",
     zIndex: 10,
     width: 120,
     height: 120,
@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
     color: "#2c3e50",
-    paddingTop: 150,
+    paddingTop: 150, // Espaço para o avatar
     marginBottom: 5,
   },
   userType: {
@@ -209,32 +209,29 @@ const styles = StyleSheet.create({
     color: "#7f8c8d",
   },
   button: {
-    marginTop: 80,
     flexDirection: "row",
     alignItems: "center",
-    padding: 16,
+    justifyContent: "center",
+    width: "90%",
+    height: 60,
     borderRadius: 12,
-    width: '90%',
-    justifyContent: 'center',
+    marginVertical: 8,
+    paddingHorizontal: 16,
     elevation: 3,
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
   },
   scanButton: {
     backgroundColor: "#3498db",
-    bottom: 30
   },
-  closeButton: {
-    backgroundColor: "#e74c3c",
-    position: 'absolute',
-    bottom: 40,
-    left: '5%',
-    right: '5%',
+  chatButton: {
+    backgroundColor: "#27ae60",
+  },
+  logoutButton: {
+    backgroundColor: "#E06666",
+    marginTop: 160
   },
   buttonDisabled: {
     backgroundColor: "#bdc3c7",
@@ -275,16 +272,15 @@ const styles = StyleSheet.create({
     width: "100%",
     marginTop: 10,
   },
-  chatButton: {
-    backgroundColor: "#27ae60",
-    marginTop: -2,
+  closeButton: {
+    backgroundColor: "#e74c3c",
+    position: "absolute",
+    bottom: 40,
+    left: "5%",
+    right: "5%",
   },
-  logoutButton: {
-    backgroundColor: '#E06666',
-    alignItems: 'center',
-    marginTop: 95,
-
-  }
 });
+
+
 
 export default AlunoProfileScreen;
