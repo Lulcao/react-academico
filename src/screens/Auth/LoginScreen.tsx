@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { mockUsers, User } from '../../services/mockData';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { RootStackParamList } from '../../navigation/AppNavigator';
 import { useAuth } from '../../context/AuthContext';
 
 const LoginScreen: React.FC = () => {
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [error, setError] = useState<string>('');
@@ -17,7 +20,12 @@ const LoginScreen: React.FC = () => {
     if (user) {
       setError('');
       login(user.role, user.email, user.nome, user.sobrenome, user.periodo);
-    } else {
+      setTimeout(() => {
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'AlunoProfileScreen' }],
+      });
+    },2)} else {
       setError('Credenciais inválidas. Verifique seu usuario e senha.');
     }
   };

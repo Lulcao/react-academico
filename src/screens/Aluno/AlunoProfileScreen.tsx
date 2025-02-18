@@ -2,11 +2,15 @@ import React from 'react';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { RootStackParamList } from '../../navigation/AppNavigator';
+import { useAuth } from '../../context/AuthContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 
 const AlunoProfileScreen = () => {
   
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const { logout } = useAuth();
 
   const handleEditarDados = () => {
     navigation.navigate('ChangeData');
@@ -16,9 +20,14 @@ const AlunoProfileScreen = () => {
     navigation.navigate('AlunoQRCode');
   };
 
-  const handleLogout = () => {
-    console.log('Logout');
-  };
+  const handleLogout = async () => {
+    await AsyncStorage.clear();
+    logout();
+
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'LoginScreen' }],
+    });  };
 
   return (
     <View style={styles.container}>

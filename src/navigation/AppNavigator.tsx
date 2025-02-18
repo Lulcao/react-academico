@@ -4,6 +4,7 @@ import ProfessorProfileScreen from '../screens/Professor/ProfessorProfileScreen'
 import AlunoProfileScreen from '../screens/Aluno/AlunoProfileScreen';
 import ChangeData from '../screens/Aluno/ChangeData';
 import AlunoQRCode from '../screens/Aluno/AlunoQRCode';
+import LoginScreen from '../screens/Auth/LoginScreen';
 import { useAuth } from '../context/AuthContext';
 
 export type RootStackParamList = {
@@ -11,6 +12,7 @@ export type RootStackParamList = {
   AlunoProfileScreen: undefined;
   AlunoQRCode: undefined;
   ChangeData: undefined;
+  LoginScreen: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -27,6 +29,11 @@ const AppNavigator: React.FC = () => {
       <Stack.Screen 
         name="ProfessorProfileScreen" 
         component={ProfessorProfileScreen} 
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="LoginScreen" 
+        component={LoginScreen} 
         options={{ headerShown: false }}
       />
       <Stack.Screen 

@@ -1,4 +1,3 @@
-// AuthContext.tsx
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 
 export type UserRole = 'professor' | 'aluno' | null;
