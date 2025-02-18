@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Alert, Modal, SafeAreaView, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { CameraView, useCameraPermissions } from "expo-camera";
-import { ref, push } from "firebase/database";
+import { ref, push, get, query, orderByChild, equalTo } from "firebase/database";
 import { db } from "../../utils/firebaseConfig";
 import { useAuth } from "../../context/AuthContext";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -25,7 +25,8 @@ const AlunoProfileScreen: React.FC = () => {
     navigation.reset({
       index: 0,
       routes: [{ name: 'LoginScreen' }],
-    });  };
+    });
+  };
 
   async function handleOpenCamera() {
     const { granted } = await requestPermission();
@@ -35,7 +36,27 @@ const AlunoProfileScreen: React.FC = () => {
     lastScanRef.current = 0;
   }
 
-  const handleScanQRCode = useCallback((qrCodeValue: string) => {
+  const checkExistingPresenca = async (qrCodeValue: string) => {
+    const presencasRef = ref(db, "presencas");
+    const presencaQuery = query(
+      presencasRef,
+      orderByChild("qrCode"),
+      equalTo(qrCodeValue)
+    );
+
+    const snapshot = await get(presencaQuery);
+    const presencas = snapshot.val();
+
+    if (presencas) {
+      const userPresencas = Object.values(presencas).filter(
+        (presenca: any) => presenca.nome === userEmail
+      );
+      return userPresencas.length > 0;
+    }
+    return false;
+  };
+
+  const handleScanQRCode = useCallback(async (qrCodeValue: string) => {
     const now = Date.now();
 
     if (isScanning || (now - lastScanRef.current) < SCAN_COOLDOWN) {
@@ -45,32 +66,41 @@ const AlunoProfileScreen: React.FC = () => {
     setIsScanning(true);
     lastScanRef.current = now;
 
-    const alunoPresente = {
-      nome: userEmail,
-      horario: new Date().toISOString(),
-      qrCode: qrCodeValue,
-    };
+    try {
+      const hasExistingPresenca = await checkExistingPresenca(qrCodeValue);
 
-    push(ref(db, "presencas/"), alunoPresente)
-      .then(() => {
+      if (hasExistingPresenca) {
         Alert.alert(
-          "Presença Confirmada!",
-          "Sua presença foi registrada com sucesso.",
+          "Presença Já Registrada",
+          "Não é possível registrar sua presença mais de uma vez",
           [{ text: "OK", onPress: () => setModalIsVisible(false) }]
         );
-      })
-      .catch((error) => {
-        console.error(error);
-        Alert.alert(
-          "Erro no Registro",
-          "Não foi possível registrar sua presença. Tente novamente."
-        );
-      })
-      .finally(() => {
-        setTimeout(() => {
-          setIsScanning(false);
-        }, SCAN_COOLDOWN);
-      });
+        return;
+      }
+
+      const alunoPresente = {
+        nome: userEmail,
+        horario: new Date().toISOString(),
+        qrCode: qrCodeValue,
+      };
+
+      await push(ref(db, "presencas/"), alunoPresente);
+      Alert.alert(
+        "Presença Confirmada!",
+        "Sua presença foi registrada com sucesso.",
+        [{ text: "OK", onPress: () => setModalIsVisible(false) }]
+      );
+    } catch (error) {
+      console.error(error);
+      Alert.alert(
+        "Erro no Registro",
+        "Não foi possível registrar sua presença. Tente novamente."
+      );
+    } finally {
+      setTimeout(() => {
+        setIsScanning(false);
+      }, SCAN_COOLDOWN);
+    }
   }, [userEmail, isScanning]);
 
   const handleCloseCamera = useCallback(() => {
@@ -114,9 +144,9 @@ const AlunoProfileScreen: React.FC = () => {
         <TouchableOpacity 
           style={[styles.button, styles.logoutButton]} 
           onPress={handleLogout}>
-        <Ionicons name= "exit-outline" size={28} color="white" />
-        <Text style={styles.buttonText}>Logout</Text>
-      </TouchableOpacity>
+          <Ionicons name="exit-outline" size={28} color="white" />
+          <Text style={styles.buttonText}>Logout</Text>
+        </TouchableOpacity>
       </View>
 
       <Modal visible={modalIsVisible} animationType="slide">
