@@ -55,5 +55,14 @@ export interface User {
       sobrenome: 'A',
       periodo: 10
     },
+    {
+      id: 6,
+      email: 'b',
+      password: 'b',
+      role: 'professor',
+      nome: 'B',
+      sobrenome: 'B',
+      periodo: 0
+    }
   ];
   

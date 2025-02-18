@@ -111,7 +111,9 @@ const AlunoProfileScreen: React.FC = () => {
           <Ionicons name="chatbubbles-outline" size={28} color="white" />
           <Text style={styles.buttonText}>Chat</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.button, styles.logoutButton]} onPress={handleLogout}>
+        <TouchableOpacity 
+          style={[styles.button, styles.logoutButton]} 
+          onPress={handleLogout}>
         <Ionicons name= "exit-outline" size={28} color="white" />
         <Text style={styles.buttonText}>Logout</Text>
       </TouchableOpacity>

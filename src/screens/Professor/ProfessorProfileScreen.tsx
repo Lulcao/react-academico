@@ -7,14 +7,25 @@ import { db } from "../../utils/firebaseConfig";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../navigation/AppNavigator";
 import { useNavigation } from "@react-navigation/native";
+import { useAuth } from '../../context/AuthContext';
+
 
 const ProfessorProfileScreen: React.FC = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const { logout } = useAuth();
   const [qrCodeVisible, setQrCodeVisible] = useState(false);
   const [qrCodeData, setQrCodeData] = useState("");
   const [currentDate, setCurrentDate] = useState("");
   const [presencas, setPresencas] = useState<any[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const handleLogout = async () => {
+    logout();
+
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'LoginScreen' }],
+    });  };
 
   useEffect(() => {
     const presencaRef = ref(db, "presencas/");
@@ -104,6 +115,8 @@ const ProfessorProfileScreen: React.FC = () => {
           <Text style={styles.buttonText}>Chat</Text>
         </TouchableOpacity>
 
+
+
         {qrCodeVisible && (
           <View style={styles.qrCodeContainer}>
             <View style={styles.qrCodeWrapper}>
@@ -125,6 +138,11 @@ const ProfessorProfileScreen: React.FC = () => {
         >
           <Ionicons name="list-outline" size={24} color="white" />
           <Text style={styles.buttonText}>Lista de Presenças</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.button, styles.logoutButton]} onPress={handleLogout}>
+          <Ionicons name= "exit-outline" size={28} color="white" />
+          <Text style={styles.buttonText}>Logout</Text>
         </TouchableOpacity>
       </View>
 
@@ -340,6 +358,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#27ae60",
     marginTop: 10,
   },
+  logoutButton: {
+    backgroundColor: '#E06666',
+    alignItems: 'center',
+    marginTop: 350,
+  }
 });
 
 export default ProfessorProfileScreen;
