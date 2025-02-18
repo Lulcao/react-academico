@@ -156,7 +156,6 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: "center",
     justifyContent: "space-between",
-    paddingBottom: 40,
   },
   userInfo: {
     alignItems: "center",
@@ -207,7 +206,7 @@ const styles = StyleSheet.create({
   },
   scanButton: {
     backgroundColor: "#3498db",
-    bottom: 300
+    bottom: 100
   },
   closeButton: {
     backgroundColor: "#e74c3c",
@@ -257,7 +256,7 @@ const styles = StyleSheet.create({
   },
   chatButton: {
     backgroundColor: "#27ae60",
-    marginTop: 10,
+    bottom: 270
   },
 });
 
