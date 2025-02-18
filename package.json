@@ -1,5 +1,5 @@
 {
-  "name": "academimais",
+  "name": "ControlePres",
   "license": "0BSD",
   "version": "1.0.0",
   "main": "index.ts",
@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@expo/metro-runtime": "~4.0.1",
+    "@react-native-async-storage/async-storage": "1.23.1",
     "@react-navigation/native": "^7.0.14",
     "@react-navigation/stack": "^7.1.1",
     "expo": "~52.0.35",

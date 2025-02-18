@@ -5,11 +5,11 @@ export type UserRole = 'professor' | 'aluno' | null;
 interface AuthContextData {
   isLoggedIn: boolean;
   userRole: UserRole;
-  username: string | null;
+  userEmail: string | null;
   nome: string | null;
   sobrenome: string | null;
   periodo: number | null;
-  login: (role: UserRole, username: string, nome: string, sobrenome: string, periodo: number) => void;
+  login: (role: UserRole, userEmail: string, nome: string, sobrenome: string, periodo: number) => void;
   logout: () => void;
 }
 
@@ -20,7 +20,7 @@ interface AuthProviderProps {
 const AuthContext = createContext<AuthContextData>({
   isLoggedIn: false,
   userRole: null,
-  username: null,
+  userEmail: null,
   nome: null,
   sobrenome: null,
   periodo: null,
@@ -31,15 +31,15 @@ const AuthContext = createContext<AuthContextData>({
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [userRole, setUserRole] = useState<UserRole>(null);
-  const [username, setUsername] = useState<string | null>(null);
+  const [userEmail, setuserEmail] = useState<string | null>(null);
   const [nome, setNome] = useState<string | null>(null);
   const [periodo, setPeriodo] = useState<number | null>(null);
   const [sobrenome, setSobrenome] = useState<string | null>(null);
 
-  const login = (role: UserRole, username: string, nome: string, sobrenome: string, periodo: number) => {
+  const login = (role: UserRole, userEmail: string, nome: string, sobrenome: string, periodo: number) => {
     setIsLoggedIn(true);
     setUserRole(role);
-    setUsername(username);
+    setuserEmail(userEmail);
     setNome(nome);
     setSobrenome(sobrenome);
     setPeriodo(periodo);
@@ -48,14 +48,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = () => {
     setIsLoggedIn(false);
     setUserRole(null);
-    setUsername(null);
+    setuserEmail(null);
     setNome(null);
     setSobrenome(null);
     setPeriodo(null);
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, userRole, username, nome, sobrenome, periodo, login, logout }}>
+    <AuthContext.Provider value={{ isLoggedIn, userRole, userEmail, nome, sobrenome, periodo, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

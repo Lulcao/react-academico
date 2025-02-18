@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { mockUsers, User } from '../../services/mockData';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../navigation/AppNavigator';
@@ -20,13 +20,14 @@ const LoginScreen: React.FC = () => {
     if (user) {
       setError('');
       login(user.role, user.email, user.nome, user.sobrenome, user.periodo);
+      Alert.alert("Sucesso", "Você foi logado com sucesso!");
       setTimeout(() => {
       navigation.reset({
         index: 0,
         routes: [{ name: 'AlunoProfileScreen' }],
       });
     },2)} else {
-      setError('Credenciais inválidas. Verifique seu usuario e senha.');
+      Alert.alert("Erro", "Email ou senha inválidos.");
     }
   };
 
