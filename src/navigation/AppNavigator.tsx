@@ -4,10 +4,12 @@ import { createStackNavigator } from '@react-navigation/stack';
 import ProfessorProfileScreen from '../screens/Professor/ProfessorProfileScreen';
 import AlunoProfileScreen from '../screens/Aluno/AlunoProfileScreen';
 import { useAuth } from '../context/AuthContext';
+import ChatScreen from '../screens/ChatScreen';
 
 export type RootStackParamList = {
   ProfessorProfileScreen: undefined;
   AlunoProfileScreen: undefined;
+  ChatScreen:undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -29,6 +31,10 @@ const AppNavigator: React.FC = () => {
         component={AlunoProfileScreen} 
         options={{ headerShown: false }}
       />
+      <Stack.Screen 
+        name="ChatScreen" 
+        component={ChatScreen} 
+        />
     </Stack.Navigator>
   );
 };

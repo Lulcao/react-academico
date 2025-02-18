@@ -5,14 +5,19 @@ import { CameraView, useCameraPermissions } from "expo-camera";
 import { ref, push } from "firebase/database";
 import { db } from "../../utils/firebaseConfig";
 import { useAuth } from "../../context/AuthContext";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "../../navigation/AppNavigator";
+import { useNavigation } from "@react-navigation/native";
 
 const AlunoProfileScreen: React.FC = () => {
   const { userEmail } = useAuth();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const [modalIsVisible, setModalIsVisible] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
   const [isScanning, setIsScanning] = useState(false);
   const lastScanRef = useRef<number>(0);
   const SCAN_COOLDOWN = 3000;
+  
 
   async function handleOpenCamera() {
     const { granted } = await requestPermission();
@@ -24,7 +29,7 @@ const AlunoProfileScreen: React.FC = () => {
 
   const handleScanQRCode = useCallback((qrCodeValue: string) => {
     const now = Date.now();
-    
+
     if (isScanning || (now - lastScanRef.current) < SCAN_COOLDOWN) {
       return;
     }
@@ -41,7 +46,7 @@ const AlunoProfileScreen: React.FC = () => {
     push(ref(db, "presencas/"), alunoPresente)
       .then(() => {
         Alert.alert(
-          "Presença Confirmada!", 
+          "Presença Confirmada!",
           "Sua presença foi registrada com sucesso.",
           [{ text: "OK", onPress: () => setModalIsVisible(false) }]
         );
@@ -49,7 +54,7 @@ const AlunoProfileScreen: React.FC = () => {
       .catch((error) => {
         console.error(error);
         Alert.alert(
-          "Erro no Registro", 
+          "Erro no Registro",
           "Não foi possível registrar sua presença. Tente novamente."
         );
       })
@@ -82,13 +87,21 @@ const AlunoProfileScreen: React.FC = () => {
           <Text style={styles.userType}>Aluno</Text>
         </View>
 
-        <TouchableOpacity 
-          style={[styles.button, styles.scanButton, isScanning && styles.buttonDisabled]} 
+        <TouchableOpacity
+          style={[styles.button, styles.scanButton, isScanning && styles.buttonDisabled]}
           onPress={handleOpenCamera}
           disabled={isScanning}
         >
           <Ionicons name="qr-code-outline" size={28} color="white" />
           <Text style={styles.buttonText}>Escanear QR Presença</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.button, styles.chatButton]}
+          onPress={() => navigation.navigate("ChatScreen")}
+        >
+          <Ionicons name="chatbubbles-outline" size={28} color="white" />
+          <Text style={styles.buttonText}>Chat</Text>
         </TouchableOpacity>
       </View>
 
@@ -105,8 +118,8 @@ const AlunoProfileScreen: React.FC = () => {
             onBarcodeScanned={isScanning ? undefined : (e) => handleScanQRCode(e.data)}
           />
 
-          <TouchableOpacity 
-            style={[styles.button, styles.closeButton]} 
+          <TouchableOpacity
+            style={[styles.button, styles.closeButton]}
             onPress={handleCloseCamera}
           >
             <Ionicons name="close-circle-outline" size={24} color="white" />
@@ -117,7 +130,6 @@ const AlunoProfileScreen: React.FC = () => {
     </SafeAreaView>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -235,6 +247,17 @@ const styles = StyleSheet.create({
   },
   camera: {
     flex: 1,
+  },
+  buttonContainer: {
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+    marginTop: 20,
+  },
+  chatButton: {
+    backgroundColor: "#27ae60",
+    marginTop: 10,
   },
 });
 

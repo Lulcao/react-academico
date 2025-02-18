@@ -4,8 +4,12 @@ import QRCode from "react-native-qrcode-svg";
 import { Ionicons } from "@expo/vector-icons";
 import { ref, onValue, remove, get } from "firebase/database";
 import { db } from "../../utils/firebaseConfig";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "../../navigation/AppNavigator";
+import { useNavigation } from "@react-navigation/native";
 
 const ProfessorProfileScreen: React.FC = () => {
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const [qrCodeVisible, setQrCodeVisible] = useState(false);
   const [qrCodeData, setQrCodeData] = useState("");
   const [currentDate, setCurrentDate] = useState("");
@@ -48,7 +52,7 @@ const ProfessorProfileScreen: React.FC = () => {
   const openModal = () => setIsModalVisible(true);
   const closeModal = () => setIsModalVisible(false);
 
-  
+
 
   const renderPresencaItem = ({ item }: { item: any }) => (
     <View style={styles.presencaItem}>
@@ -84,19 +88,27 @@ const ProfessorProfileScreen: React.FC = () => {
       </View>
 
       <View style={styles.content}>
-        <TouchableOpacity 
-          style={[styles.button, styles.primaryButton]} 
+        <TouchableOpacity
+          style={[styles.button, styles.primaryButton]}
           onPress={handleGenerateQRCode}
         >
           <Ionicons name="qr-code-outline" size={24} color="white" />
           <Text style={styles.buttonText}>Gerar QR Presença</Text>
         </TouchableOpacity>
 
+        <TouchableOpacity
+          style={[styles.button, styles.chatButton]}
+          onPress={() => navigation.navigate("ChatScreen")}
+        >
+          <Ionicons name="chatbubbles-outline" size={28} color="white" />
+          <Text style={styles.buttonText}>Chat</Text>
+        </TouchableOpacity>
+
         {qrCodeVisible && (
           <View style={styles.qrCodeContainer}>
             <View style={styles.qrCodeWrapper}>
               <QRCode value={qrCodeData} size={200} />
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.closeQRButton}
                 onPress={handleCloseQRCode}
               >
@@ -107,8 +119,8 @@ const ProfessorProfileScreen: React.FC = () => {
           </View>
         )}
 
-        <TouchableOpacity 
-          style={[styles.button, styles.secondaryButton]} 
+        <TouchableOpacity
+          style={[styles.button, styles.secondaryButton]}
           onPress={openModal}
         >
           <Ionicons name="list-outline" size={24} color="white" />
@@ -134,16 +146,16 @@ const ProfessorProfileScreen: React.FC = () => {
             />
 
             <View style={styles.modalFooter}>
-              <TouchableOpacity 
-                style={[styles.button, styles.dangerButton]} 
+              <TouchableOpacity
+                style={[styles.button, styles.dangerButton]}
                 onPress={clearPresencas}
               >
                 <Ionicons name="trash-outline" size={24} color="white" />
                 <Text style={styles.buttonText}>Limpar Lista</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity 
-                style={[styles.button, styles.closeButton]} 
+              <TouchableOpacity
+                style={[styles.button, styles.closeButton]}
                 onPress={closeModal}
               >
                 <Ionicons name="close-outline" size={24} color="white" />
@@ -323,6 +335,10 @@ const styles = StyleSheet.create({
     padding: 15,
     borderTopWidth: 1,
     borderTopColor: "#ecf0f1",
+  },
+  chatButton: {
+    backgroundColor: "#27ae60",
+    marginTop: 10,
   },
 });
 
