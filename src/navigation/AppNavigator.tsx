@@ -2,7 +2,6 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import ProfessorProfileScreen from '../screens/Professor/ProfessorProfileScreen';
 import AlunoProfileScreen from '../screens/Aluno/AlunoProfileScreen';
-import ChangeData from '../screens/Aluno/ChangeData';
 import LoginScreen from '../screens/Auth/LoginScreen';
 import { useAuth } from '../context/AuthContext';
 import ChatScreen from '../screens/ChatScreen';
@@ -43,11 +42,6 @@ const AppNavigator: React.FC = () => {
       <Stack.Screen 
         name="ChatScreen" 
         component={ChatScreen} 
-        />
-        <Stack.Screen 
-        name="ChangeData" 
-        component={ChangeData} 
-        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );
