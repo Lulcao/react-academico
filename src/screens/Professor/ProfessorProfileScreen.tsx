@@ -8,8 +8,6 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../navigation/AppNavigator";
 import { useNavigation } from "@react-navigation/native";
 import { useAuth } from '../../context/AuthContext';
-import { PieChart } from "react-native-chart-kit";
-import { Dimensions } from "react-native";
 
 
 const ProfessorProfileScreen: React.FC = () => {
@@ -20,8 +18,6 @@ const ProfessorProfileScreen: React.FC = () => {
   const [currentDate, setCurrentDate] = useState("");
   const [presencas, setPresencas] = useState<any[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isGraphModalVisible, setIsGraphModalVisible] = useState(false);
-  const TOTAL_ALUNOS = 12;
 
   const handleLogout = async () => {
     logout();
@@ -29,8 +25,7 @@ const ProfessorProfileScreen: React.FC = () => {
     navigation.reset({
       index: 0,
       routes: [{ name: 'LoginScreen' }],
-    });
-  };
+    });  };
 
   useEffect(() => {
     const presencaRef = ref(db, "presencas/");
@@ -96,59 +91,6 @@ const ProfessorProfileScreen: React.FC = () => {
       });
   };
 
-
-  const renderAttendanceGraph = () => {
-    const presentStudents = new Set(presencas.map(p => p.nome)).size;
-    const absentStudents = TOTAL_ALUNOS - presentStudents;
-
-    const data = [
-      {
-        name: "Presentes",
-        population: presentStudents,
-        color: "#27ae60",
-        legendFontColor: "#7F7F7F",
-        legendFontSize: 15
-      },
-      {
-        name: "Ausentes",
-        population: absentStudents,
-        color: "#e74c3c",
-        legendFontColor: "#7F7F7F",
-        legendFontSize: 15
-      }
-    ];
-    return (
-      <View style={styles.graphContainer}>
-        <PieChart
-          data={data}
-          width={Dimensions.get("window").width - 80}
-          height={200}
-          chartConfig={{
-            backgroundColor: "#ffffff",
-            backgroundGradientFrom: "#ffffff",
-            backgroundGradientTo: "#ffffff",
-            color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-          }}
-          accessor="population"
-          backgroundColor="transparent"
-          paddingLeft="0"
-          absolute
-        />
-        <View style={styles.statisticsContainer}>
-          <Text style={styles.statisticsText}>
-            Total de Alunos: {TOTAL_ALUNOS}
-          </Text>
-          <Text style={styles.statisticsText}>
-            Presentes: {presentStudents} ({((presentStudents / TOTAL_ALUNOS) * 100).toFixed(1)}%)
-          </Text>
-          <Text style={styles.statisticsText}>
-            Ausentes: {absentStudents} ({((absentStudents / TOTAL_ALUNOS) * 100).toFixed(1)}%)
-          </Text>
-        </View>
-      </View>
-    );
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -198,16 +140,8 @@ const ProfessorProfileScreen: React.FC = () => {
           <Text style={styles.buttonText}>Lista de Presenças</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[styles.button, styles.graphButton]}
-          onPress={() => setIsGraphModalVisible(true)}
-        >
-          <Ionicons name="bar-chart-outline" size={24} color="white" />
-          <Text style={styles.buttonText}>Gráfico de Presenças</Text>
-        </TouchableOpacity>
-
         <TouchableOpacity style={[styles.button, styles.logoutButton]} onPress={handleLogout}>
-          <Ionicons name="exit-outline" size={28} color="white" />
+          <Ionicons name= "exit-outline" size={28} color="white" />
           <Text style={styles.buttonText}>Logout</Text>
         </TouchableOpacity>
       </View>
@@ -249,32 +183,6 @@ const ProfessorProfileScreen: React.FC = () => {
           </View>
         </View>
       </Modal>
-      <Modal
-        visible={isGraphModalVisible}
-        animationType="slide"
-        transparent={true}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Estatísticas de Presença</Text>
-              <Text style={styles.modalSubtitle}>{currentDate}</Text>
-            </View>
-
-            {renderAttendanceGraph()}
-
-            <View style={styles.modalFooter}>
-              <TouchableOpacity
-                style={[styles.button, styles.closeButton]}
-                onPress={() => setIsGraphModalVisible(false)}
-              >
-                <Ionicons name="close-outline" size={24} color="white" />
-                <Text style={styles.buttonText}>Fechar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 };
@@ -306,26 +214,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     top: 200
   },
-  graphButton: {
-    backgroundColor: "#9b59b6",
-  },
-  graphContainer: {
-    padding: 20,
-    alignItems: 'center',
-  },
-  statisticsContainer: {
-    marginTop: 20,
-    padding: 15,
-    backgroundColor: '#f8f9fa',
-    borderRadius: 10,
-    width: '100%',
-  },
-  statisticsText: {
-    fontSize: 16,
-    color: '#2c3e50',
-    marginBottom: 8,
-    fontWeight: '600',
-  },
   button: {
     flexDirection: "row",
     alignItems: "center",
@@ -352,7 +240,7 @@ const styles = StyleSheet.create({
   },
   logoutButton: {
     backgroundColor: "#E06666",
-    marginTop: 280, // Changed from 340
+    marginTop:340
   },
   dangerButton: {
     backgroundColor: "#e74c3c",
