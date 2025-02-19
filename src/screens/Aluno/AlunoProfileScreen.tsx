@@ -201,7 +201,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-start",
     paddingBottom: 40,
-    justifyContent: "space-between",
   },
   userInfo: {
     alignItems: "center",
