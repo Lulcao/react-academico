@@ -18,7 +18,7 @@ const LoginScreen: React.FC = () => {
     );
   
     if (user) {
-      login(user.role, user.email, user.nome, user.sobrenome, user.periodo);
+      login(user.role, user.email);
       Alert.alert("Sucesso", "Você foi logado com sucesso!");
     } else {
       Alert.alert("Erro", "Email ou senha inválidos.");
