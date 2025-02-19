@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Alert, Modal, SafeAreaView, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { CameraView, useCameraPermissions } from "expo-camera";
-import { ref, push } from "firebase/database";
+import { ref, push, get, query, orderByChild, equalTo } from "firebase/database";
 import { db } from "../../utils/firebaseConfig";
 import { useAuth } from "../../context/AuthContext";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -11,6 +11,7 @@ import { useNavigation } from "@react-navigation/native";
 
 const AlunoProfileScreen: React.FC = () => {
   const { userEmail } = useAuth();
+  const { logout } = useAuth();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const [modalIsVisible, setModalIsVisible] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
@@ -18,6 +19,14 @@ const AlunoProfileScreen: React.FC = () => {
   const lastScanRef = useRef<number>(0);
   const SCAN_COOLDOWN = 3000;
   
+  const handleLogout = async () => {
+    logout();
+
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'LoginScreen' }],
+    });
+  };
 
   async function handleOpenCamera() {
     const { granted } = await requestPermission();
@@ -27,7 +36,27 @@ const AlunoProfileScreen: React.FC = () => {
     lastScanRef.current = 0;
   }
 
-  const handleScanQRCode = useCallback((qrCodeValue: string) => {
+  const checkExistingPresenca = async (qrCodeValue: string) => {
+    const presencasRef = ref(db, "presencas");
+    const presencaQuery = query(
+      presencasRef,
+      orderByChild("qrCode"),
+      equalTo(qrCodeValue)
+    );
+
+    const snapshot = await get(presencaQuery);
+    const presencas = snapshot.val();
+
+    if (presencas) {
+      const userPresencas = Object.values(presencas).filter(
+        (presenca: any) => presenca.nome === userEmail
+      );
+      return userPresencas.length > 0;
+    }
+    return false;
+  };
+
+  const handleScanQRCode = useCallback(async (qrCodeValue: string) => {
     const now = Date.now();
 
     if (isScanning || (now - lastScanRef.current) < SCAN_COOLDOWN) {
@@ -37,32 +66,41 @@ const AlunoProfileScreen: React.FC = () => {
     setIsScanning(true);
     lastScanRef.current = now;
 
-    const alunoPresente = {
-      nome: userEmail,
-      horario: new Date().toISOString(),
-      qrCode: qrCodeValue,
-    };
+    try {
+      const hasExistingPresenca = await checkExistingPresenca(qrCodeValue);
 
-    push(ref(db, "presencas/"), alunoPresente)
-      .then(() => {
+      if (hasExistingPresenca) {
         Alert.alert(
-          "Presença Confirmada!",
-          "Sua presença foi registrada com sucesso.",
+          "Presença Já Registrada",
+          "Não é possível registrar sua presença mais de uma vez",
           [{ text: "OK", onPress: () => setModalIsVisible(false) }]
         );
-      })
-      .catch((error) => {
-        console.error(error);
-        Alert.alert(
-          "Erro no Registro",
-          "Não foi possível registrar sua presença. Tente novamente."
-        );
-      })
-      .finally(() => {
-        setTimeout(() => {
-          setIsScanning(false);
-        }, SCAN_COOLDOWN);
-      });
+        return;
+      }
+
+      const alunoPresente = {
+        nome: userEmail,
+        horario: new Date().toISOString(),
+        qrCode: qrCodeValue,
+      };
+
+      await push(ref(db, "presencas/"), alunoPresente);
+      Alert.alert(
+        "Presença Confirmada!",
+        "Sua presença foi registrada com sucesso.",
+        [{ text: "OK", onPress: () => setModalIsVisible(false) }]
+      );
+    } catch (error) {
+      console.error(error);
+      Alert.alert(
+        "Erro no Registro",
+        "Não foi possível registrar sua presença. Tente novamente."
+      );
+    } finally {
+      setTimeout(() => {
+        setIsScanning(false);
+      }, SCAN_COOLDOWN);
+    }
   }, [userEmail, isScanning]);
 
   const handleCloseCamera = useCallback(() => {
@@ -103,6 +141,12 @@ const AlunoProfileScreen: React.FC = () => {
           <Ionicons name="chatbubbles-outline" size={28} color="white" />
           <Text style={styles.buttonText}>Chat</Text>
         </TouchableOpacity>
+        <TouchableOpacity 
+          style={[styles.button, styles.logoutButton]} 
+          onPress={handleLogout}>
+          <Ionicons name="exit-outline" size={28} color="white" />
+          <Text style={styles.buttonText}>Logout</Text>
+        </TouchableOpacity>
       </View>
 
       <Modal visible={modalIsVisible} animationType="slide">
@@ -138,7 +182,7 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: "#2c3e50",
     padding: 20,
-    paddingTop: Platform.OS === 'android' ? 40 : 20,
+    paddingTop: Platform.OS === "android" ? 40 : 20,
     alignItems: "center",
   },
   title: {
@@ -155,13 +199,18 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     alignItems: "center",
+    justifyContent: "flex-start",
+    paddingBottom: 40,
     justifyContent: "space-between",
   },
   userInfo: {
     alignItems: "center",
     marginTop: 30,
+    marginBottom: 20,
   },
   avatarContainer: {
+    position: "absolute",
+    zIndex: 10,
     width: 120,
     height: 120,
     borderRadius: 60,
@@ -169,7 +218,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 15,
-    elevation: 3,
+    elevation: 10,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -182,25 +231,26 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
     color: "#2c3e50",
+    paddingTop: 150, // Espaço para o avatar
     marginBottom: 5,
   },
   userType: {
     fontSize: 16,
+    paddingTop: 10,
     color: "#7f8c8d",
   },
   button: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 16,
+    justifyContent: "center",
+    width: "90%",
+    height: 60,
     borderRadius: 12,
-    width: '90%',
-    justifyContent: 'center',
+    marginVertical: 8,
+    paddingHorizontal: 16,
     elevation: 3,
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
   },
@@ -208,12 +258,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#3498db",
     bottom: 100
   },
-  closeButton: {
-    backgroundColor: "#e74c3c",
-    position: 'absolute',
-    bottom: 40,
-    left: '5%',
-    right: '5%',
+  chatButton: {
+    backgroundColor: "#27ae60",
+  },
+  logoutButton: {
+    backgroundColor: "#E06666",
+    marginTop: 160
   },
   buttonDisabled: {
     backgroundColor: "#bdc3c7",
@@ -252,12 +302,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     width: "100%",
-    marginTop: 20,
+    marginTop: 10,
   },
-  chatButton: {
-    backgroundColor: "#27ae60",
-    bottom: 270
+  closeButton: {
+    backgroundColor: "#e74c3c",
+    position: "absolute",
+    bottom: 40,
+    left: "5%",
+    right: "5%",
   },
 });
+
+
 
 export default AlunoProfileScreen;

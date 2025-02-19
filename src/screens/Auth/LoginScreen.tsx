@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { mockUsers, User } from '../../services/mockData';
+import { useNavigation, NavigationProp, CommonActions } from '@react-navigation/native';
+import { RootStackParamList } from '../../navigation/AppNavigator';
 import { useAuth } from '../../context/AuthContext';
 
 const LoginScreen: React.FC = () => {
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [error, setError] = useState<string>('');
@@ -13,18 +16,19 @@ const LoginScreen: React.FC = () => {
     const user: User | undefined = mockUsers.find(
       (u) => u.email === email.trim() && u.password === password
     );
-    
+  
     if (user) {
-      login(user.role, user.email);  // Passar o email correto para o login
+      login(user.role, user.email, user.nome, user.sobrenome, user.periodo);
       Alert.alert("Sucesso", "Você foi logado com sucesso!");
     } else {
       Alert.alert("Erro", "Email ou senha inválidos.");
     }
   };
+  
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Controle de Presença CEFET/RJ</Text>
+      <Text style={styles.title}>Projeto Academico - CEFET/RJ</Text>
       <TextInput
         style={styles.input}
         placeholder="Usuário"

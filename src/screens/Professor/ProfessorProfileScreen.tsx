@@ -7,14 +7,30 @@ import { db } from "../../utils/firebaseConfig";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../navigation/AppNavigator";
 import { useNavigation } from "@react-navigation/native";
+import { useAuth } from '../../context/AuthContext';
+import { PieChart } from "react-native-chart-kit";
+import { Dimensions } from "react-native";
+
 
 const ProfessorProfileScreen: React.FC = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const { logout } = useAuth();
   const [qrCodeVisible, setQrCodeVisible] = useState(false);
   const [qrCodeData, setQrCodeData] = useState("");
   const [currentDate, setCurrentDate] = useState("");
   const [presencas, setPresencas] = useState<any[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isGraphModalVisible, setIsGraphModalVisible] = useState(false);
+  const TOTAL_ALUNOS = 12;
+
+  const handleLogout = async () => {
+    logout();
+
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'LoginScreen' }],
+    });
+  };
 
   useEffect(() => {
     const presencaRef = ref(db, "presencas/");
@@ -80,6 +96,59 @@ const ProfessorProfileScreen: React.FC = () => {
       });
   };
 
+
+  const renderAttendanceGraph = () => {
+    const presentStudents = new Set(presencas.map(p => p.nome)).size;
+    const absentStudents = TOTAL_ALUNOS - presentStudents;
+
+    const data = [
+      {
+        name: "Presentes",
+        population: presentStudents,
+        color: "#27ae60",
+        legendFontColor: "#7F7F7F",
+        legendFontSize: 15
+      },
+      {
+        name: "Ausentes",
+        population: absentStudents,
+        color: "#e74c3c",
+        legendFontColor: "#7F7F7F",
+        legendFontSize: 15
+      }
+    ];
+    return (
+      <View style={styles.graphContainer}>
+        <PieChart
+          data={data}
+          width={Dimensions.get("window").width - 80}
+          height={200}
+          chartConfig={{
+            backgroundColor: "#ffffff",
+            backgroundGradientFrom: "#ffffff",
+            backgroundGradientTo: "#ffffff",
+            color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+          }}
+          accessor="population"
+          backgroundColor="transparent"
+          paddingLeft="0"
+          absolute
+        />
+        <View style={styles.statisticsContainer}>
+          <Text style={styles.statisticsText}>
+            Total de Alunos: {TOTAL_ALUNOS}
+          </Text>
+          <Text style={styles.statisticsText}>
+            Presentes: {presentStudents} ({((presentStudents / TOTAL_ALUNOS) * 100).toFixed(1)}%)
+          </Text>
+          <Text style={styles.statisticsText}>
+            Ausentes: {absentStudents} ({((absentStudents / TOTAL_ALUNOS) * 100).toFixed(1)}%)
+          </Text>
+        </View>
+      </View>
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -104,6 +173,8 @@ const ProfessorProfileScreen: React.FC = () => {
           <Text style={styles.buttonText}>Chat</Text>
         </TouchableOpacity>
 
+
+
         {qrCodeVisible && (
           <View style={styles.qrCodeContainer}>
             <View style={styles.qrCodeWrapper}>
@@ -125,6 +196,19 @@ const ProfessorProfileScreen: React.FC = () => {
         >
           <Ionicons name="list-outline" size={24} color="white" />
           <Text style={styles.buttonText}>Lista de Presenças</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.button, styles.graphButton]}
+          onPress={() => setIsGraphModalVisible(true)}
+        >
+          <Ionicons name="bar-chart-outline" size={24} color="white" />
+          <Text style={styles.buttonText}>Gráfico de Presenças</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.button, styles.logoutButton]} onPress={handleLogout}>
+          <Ionicons name="exit-outline" size={28} color="white" />
+          <Text style={styles.buttonText}>Logout</Text>
         </TouchableOpacity>
       </View>
 
@@ -165,6 +249,32 @@ const ProfessorProfileScreen: React.FC = () => {
           </View>
         </View>
       </Modal>
+      <Modal
+        visible={isGraphModalVisible}
+        animationType="slide"
+        transparent={true}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Estatísticas de Presença</Text>
+              <Text style={styles.modalSubtitle}>{currentDate}</Text>
+            </View>
+
+            {renderAttendanceGraph()}
+
+            <View style={styles.modalFooter}>
+              <TouchableOpacity
+                style={[styles.button, styles.closeButton]}
+                onPress={() => setIsGraphModalVisible(false)}
+              >
+                <Ionicons name="close-outline" size={24} color="white" />
+                <Text style={styles.buttonText}>Fechar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -177,7 +287,7 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: "#2c3e50",
     padding: 20,
-    paddingTop: Platform.OS === 'android' ? 40 : 20,
+    paddingTop: Platform.OS === "android" ? 40 : 20,
     alignItems: "center",
   },
   title: {
@@ -196,20 +306,38 @@ const styles = StyleSheet.create({
     alignItems: "center",
     top: 200
   },
+  graphButton: {
+    backgroundColor: "#9b59b6",
+  },
+  graphContainer: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  statisticsContainer: {
+    marginTop: 20,
+    padding: 15,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 10,
+    width: '100%',
+  },
+  statisticsText: {
+    fontSize: 16,
+    color: '#2c3e50',
+    marginBottom: 8,
+    fontWeight: '600',
+  },
   button: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 15,
+    justifyContent: "center",
+    width: "90%",
+    height: 60,
     borderRadius: 12,
-    width: '90%',
-    justifyContent: 'center',
     marginVertical: 8,
+    paddingHorizontal: 16,
     elevation: 3,
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
   },
@@ -218,6 +346,13 @@ const styles = StyleSheet.create({
   },
   secondaryButton: {
     backgroundColor: "#2980b9",
+  },
+  chatButton: {
+    backgroundColor: "#27ae60",
+  },
+  logoutButton: {
+    backgroundColor: "#E06666",
+    marginTop: 280, // Changed from 340
   },
   dangerButton: {
     backgroundColor: "#e74c3c",
@@ -242,19 +377,16 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     elevation: 5,
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    position: 'relative',
+    position: "relative",
   },
   closeQRButton: {
-    position: 'absolute',
+    position: "absolute",
     top: -15,
     right: -15,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 20,
     padding: 2,
   },
@@ -305,10 +437,7 @@ const styles = StyleSheet.create({
     padding: 15,
     elevation: 2,
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.22,
     shadowRadius: 2.22,
   },
@@ -337,10 +466,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: "#ecf0f1",
   },
-  chatButton: {
-    backgroundColor: "#27ae60",
-    marginTop: 10,
-  },
 });
+
 
 export default ProfessorProfileScreen;

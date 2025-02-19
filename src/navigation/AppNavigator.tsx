@@ -1,14 +1,17 @@
-// src/navigation/AppNavigator.tsx
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import ProfessorProfileScreen from '../screens/Professor/ProfessorProfileScreen';
 import AlunoProfileScreen from '../screens/Aluno/AlunoProfileScreen';
+import ChangeData from '../screens/Aluno/ChangeData';
+import LoginScreen from '../screens/Auth/LoginScreen';
 import { useAuth } from '../context/AuthContext';
 import ChatScreen from '../screens/ChatScreen';
 
 export type RootStackParamList = {
   ProfessorProfileScreen: undefined;
   AlunoProfileScreen: undefined;
+  ChangeData: undefined;
+  LoginScreen: undefined;
   ChatScreen:undefined;
 };
 
@@ -19,12 +22,18 @@ const AppNavigator: React.FC = () => {
 
   return (
     <Stack.Navigator
-      initialRouteName={userRole === 'aluno' ? 'AlunoProfileScreen' : 'ProfessorProfileScreen'}
+      initialRouteName={
+        userRole === 'aluno' ? 'AlunoProfileScreen' : 'ProfessorProfileScreen'
+      }
     >
       <Stack.Screen 
         name="ProfessorProfileScreen" 
         component={ProfessorProfileScreen} 
         options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="LoginScreen" 
+        component={LoginScreen} 
       />
       <Stack.Screen 
         name="AlunoProfileScreen" 
@@ -35,6 +44,11 @@ const AppNavigator: React.FC = () => {
         name="ChatScreen" 
         component={ChatScreen} 
         />
+        <Stack.Screen 
+        name="ChangeData" 
+        component={ChangeData} 
+        options={{ headerShown: false }}
+      />
     </Stack.Navigator>
   );
 };
