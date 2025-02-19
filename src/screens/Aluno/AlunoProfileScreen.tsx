@@ -201,7 +201,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-start",
     paddingBottom: 40,
-    justifyContent: "space-between",
   },
   userInfo: {
     alignItems: "center",
@@ -256,7 +255,6 @@ const styles = StyleSheet.create({
   },
   scanButton: {
     backgroundColor: "#3498db",
-    bottom: 100
   },
   chatButton: {
     backgroundColor: "#27ae60",
