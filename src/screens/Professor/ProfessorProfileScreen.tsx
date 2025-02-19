@@ -222,11 +222,12 @@ const ProfessorProfileScreen: React.FC = () => {
 
             <FlatList
               data={presencas}
-              keyExtractor={(item) => item.id}
+              keyExtractor={(item) => item.id.toString()}
               renderItem={renderPresencaItem}
               style={styles.list}
               contentContainerStyle={styles.listContent}
               showsVerticalScrollIndicator={false}
+              extraData={presencas} // Força a atualização da lista quando os dados mudam
             />
 
             <View style={styles.modalFooter}>
